@@ -138,20 +138,16 @@ class GameModeTalk implements IGameUI {
   }
 
   /**
-   * Activate the 'Talk' mode UI.
-   *
-   * Usually only called by the phase manager when 'Talk' phase is
-   * pushed.
-   */
-  public async activateUI(): Promise<void> {
-    const gameManager = GameGlobalAPI.getInstance().getGameManager();
-    this.uiContainer = this.createUIContainer();
-    GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
-    
-    //CYX: create new input manager when the Game talk topics is presented
+   * CYX
+   * Register keyboard listners for talk topic selection
+   * 
+   * This is called by the activeUI function
+   * */ 
+
+  private registerKeyboardListner() : void {
     const talkTopics : ItemId[] = this.getLatestTalkTopics();
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    
+    inputManager.enableKeyboardInput(true);
     let count = 0;
     console.log(talkTopics);
     talkTopics.forEach(
@@ -167,7 +163,22 @@ class GameModeTalk implements IGameUI {
         );
         count += 1;
       }
-    )
+    );
+  }
+
+  /**
+   * Activate the 'Talk' mode UI.
+   *
+   * Usually only called by the phase manager when 'Talk' phase is
+   * pushed.
+   */
+  public async activateUI(): Promise<void> {
+    const gameManager = GameGlobalAPI.getInstance().getGameManager();
+    this.uiContainer = this.createUIContainer();
+    GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
+    
+    //CYX: create new input manager when the Game talk topics is presented
+    this.registerKeyboardListner();
 
     this.uiContainer.setPosition(this.uiContainer.x, -screenSize.y);
 
@@ -179,13 +190,10 @@ class GameModeTalk implements IGameUI {
   }
 
   /**
-   * Deactivate the 'Talk' mode UI.
-   *
-   * Usually only called by the phase manager when 'Talk' phase is
-   * transitioned out.
-   */
-  public async deactivateUI(): Promise<void> {
-    const gameManager = GameGlobalAPI.getInstance().getGameManager();
+   * Remove keyboard listners for topic selection after a topic is selected
+   * 
+   * */ 
+  private removeKeyboardListner() : void {
     const talkTopics = this.getLatestTalkTopics();
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
     
@@ -195,6 +203,17 @@ class GameModeTalk implements IGameUI {
         this.KeycodesMap[talkTopics.indexOf(dialogueId)]
       );
     });
+  }
+
+  /**
+   * Deactivate the 'Talk' mode UI.
+   *
+   * Usually only called by the phase manager when 'Talk' phase is
+   * transitioned out.
+   */
+  public async deactivateUI(): Promise<void> {
+    const gameManager = GameGlobalAPI.getInstance().getGameManager();
+    this.removeKeyboardListner();
     if (this.uiContainer) {
       this.uiContainer.setPosition(this.uiContainer.x, 0);
 

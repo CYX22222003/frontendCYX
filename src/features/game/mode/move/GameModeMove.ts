@@ -179,23 +179,14 @@ class GameModeMove implements IGameUI {
   }
 
   /**
-   * Activate the 'Move' mode UI.
-   *
-   * Usually only called by the phase manager when 'Move' phase is
-   * pushed.
-   */
-  public async activateUI(): Promise<void> {
-    const gameManager = GameGlobalAPI.getInstance().getGameManager();
-    this.uiContainer = this.createUIContainer();
-    GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
-  
-
+   * This function is to register keyboard listeners for location selection
+   * This will only be called by activateUI function
+   * */ 
+  private registerKeyboardListener() : void {
     //CYX: create new inputManager when the Game Move mode is activated
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
     inputManager.enableKeyboardInput(true);
     const navList2 : string[] = this.getLatestNavigations();
-    console.log("check for array: " + navList2);
-    console.log("check for array element: " + navList2[0]);
     
     let count = 0;
     navList2.forEach(nav => {
@@ -211,6 +202,20 @@ class GameModeMove implements IGameUI {
       count += 1;
     }
     )
+  }
+
+  /**
+   * Activate the 'Move' mode UI.
+   *
+   * Usually only called by the phase manager when 'Move' phase is
+   * pushed.
+   */
+  public async activateUI(): Promise<void> {
+    const gameManager = GameGlobalAPI.getInstance().getGameManager();
+    this.uiContainer = this.createUIContainer();
+    GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
+
+    this.registerKeyboardListener();
 
     this.uiContainer.setPosition(this.uiContainer.x, -screenSize.y);
     gameManager.tweens.add({
@@ -218,6 +223,22 @@ class GameModeMove implements IGameUI {
       ...entryTweenProps
     });
     GameGlobalAPI.getInstance().playSound(SoundAssets.modeEnter.key);
+  }
+  /**
+   * Remove keyboard listners for location selection 
+   * when Move mode is transitioned out
+   * 
+   * */ 
+
+  private removeKeyboardListner() : void {
+    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
+    const navList = this.getLatestNavigations();
+    navList.forEach( nav => {
+      inputManager.clearKeyboardListener(
+        this.KeycodesMap[navList.indexOf(nav)]  
+      );
+    }
+    );
   }
 
   /**
@@ -228,16 +249,7 @@ class GameModeMove implements IGameUI {
    */
   public async deactivateUI(): Promise<void> {
     const gameManager = GameGlobalAPI.getInstance().getGameManager();
-    /**
-     * CYX: remove input manager and keyboard register
-     * */ 
-    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    const navList = this.getLatestNavigations();
-    for(let i = 0; i < navList.length; i++) {
-      inputManager.clearKeyboardListener(
-        this.KeycodesMap[i]  
-      );
-    }
+    this.removeKeyboardListner();
     if (this.uiContainer) {
       this.uiContainer.setPosition(this.uiContainer.x, 0);
 
