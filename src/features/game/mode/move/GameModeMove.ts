@@ -14,6 +14,7 @@ import { createButton } from '../../utils/ButtonUtils';
 import { sleep } from '../../utils/GameUtils';
 import { calcTableFormatPos } from '../../utils/StyleUtils';
 import MoveModeConstants, { moveButtonStyle } from './GameModeMoveConstants';
+import { ItemId } from '../../commons/CommonTypes';
 
 /**
  * The class in charge of showing the "Move" UI
@@ -22,7 +23,6 @@ import MoveModeConstants, { moveButtonStyle } from './GameModeMoveConstants';
  */
 class GameModeMove implements IGameUI {
   private uiContainer: Phaser.GameObjects.Container | undefined;
-
   /**
    * Set the location preview sprite to the given asset key.
    *
@@ -39,7 +39,7 @@ class GameModeMove implements IGameUI {
   /**
    * Fetches the navigations of the current location id.
    */
-  private getLatestNavigations() {
+  private getLatestNavigations() : ItemId[] {
     return GameGlobalAPI.getInstance().getGameItemsInLocation(
       GameItemType.navigation,
       GameGlobalAPI.getInstance().getCurrLocId()
@@ -72,23 +72,28 @@ class GameModeMove implements IGameUI {
 
     // Add all navigation buttons
     const navigations = this.getLatestNavigations();
+    console.log(typeof navigations[0]);
+  
+    console.log(navigations);
+
     const buttons = this.getMoveButtons(navigations, previewFill);
     const buttonPositions = calcTableFormatPos({
       numOfItems: buttons.length,
       numItemLimit: 1,
       maxYSpace: MoveModeConstants.button.ySpace
     });
-
+    var id = 0;
     moveMenuContainer.add(
-      buttons.map((button, index) =>
-        this.createMoveButton(
-          button.text,
+      buttons.map((button, index) => {
+        id++;
+        return this.createMoveButton(
+          id + ": " + button.text,
           buttonPositions[index][0] + MoveModeConstants.button.xOffSet,
           buttonPositions[index][1],
           button.callback,
           button.onHover,
           button.onOut
-        )
+        ); }
       )
     );
 
@@ -172,9 +177,38 @@ class GameModeMove implements IGameUI {
     const gameManager = GameGlobalAPI.getInstance().getGameManager();
     this.uiContainer = this.createUIContainer();
     GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
+    /**
+     * CYX: add input manager and keyboard register
+     * */ 
+    const KeycodesMap = [
+      Phaser.Input.Keyboard.KeyCodes.Q,
+      Phaser.Input.Keyboard.KeyCodes.W,
+      Phaser.Input.Keyboard.KeyCodes.A
+    ];
+    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
+    inputManager.enableKeyboardInput(true);
+    const navList2 : string[] = this.getLatestNavigations();
+    console.log("check for array: " + navList2);
+    console.log("check for array element: " + navList2[0]);
+    let count = 0;
+    navList2.forEach(nav => {
+      inputManager.registerKeyboardListener(
+        KeycodesMap[count],
+        'up',
+        async () => {
+          console.log(navList2);
+          const val : string = nav;
+          console.log("check for value: " + val);
+          console.log("Test under move mode");
+          await GameGlobalAPI.getInstance().swapPhase(GamePhaseType.Sequence);
+          await GameGlobalAPI.getInstance().changeLocationTo(nav);
+        }
+      );
+      count += 1;
+    }
+    )
 
     this.uiContainer.setPosition(this.uiContainer.x, -screenSize.y);
-
     gameManager.tweens.add({
       targets: this.uiContainer,
       ...entryTweenProps
@@ -190,7 +224,22 @@ class GameModeMove implements IGameUI {
    */
   public async deactivateUI(): Promise<void> {
     const gameManager = GameGlobalAPI.getInstance().getGameManager();
-
+    /**
+     * CYX: remove input manager and keyboard register
+     * */ 
+    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
+    inputManager.enableKeyboardInput(true);
+    const navList = this.getLatestNavigations();
+    const KeycodesMap = [
+      Phaser.Input.Keyboard.KeyCodes.Q,
+      Phaser.Input.Keyboard.KeyCodes.W,
+      Phaser.Input.Keyboard.KeyCodes.A,
+    ];
+    for(var i = 0; i < navList.length; i++) {
+      inputManager.clearKeyboardListener(
+        KeycodesMap[i]  
+      );
+    }
     if (this.uiContainer) {
       this.uiContainer.setPosition(this.uiContainer.x, 0);
 

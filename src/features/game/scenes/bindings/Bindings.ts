@@ -72,7 +72,7 @@ class Bindings extends Phaser.Scene {
           binding.key,
           binding.text,
           bindingPositions[index][0],
-          bindingPositions[index][1] + BindingConstants.key.yStart
+          bindingPositions[index][1] + BindingConstants.key.yStart - 275
         )
       )
     );
@@ -100,7 +100,7 @@ class Bindings extends Phaser.Scene {
       },
       {
         key: 'Space',
-        text: 'Proceed to next dialogue line OR enter a location'
+        text: 'Next dialogue'
       },
       {
         key: 'M',
@@ -138,6 +138,13 @@ class Bindings extends Phaser.Scene {
     );
     switch (key) {
       case 'Tab':
+        keyIcon.setTexture(ImageAssets.medKeyboardIcon.key);
+        break;
+      default:
+        break;
+    }
+    switch (key) {
+      case 'Space':
         keyIcon.setTexture(ImageAssets.medKeyboardIcon.key);
         break;
       default:
