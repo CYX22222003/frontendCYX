@@ -22,6 +22,17 @@ import { ItemId } from '../../commons/CommonTypes';
  * locations from one location
  */
 class GameModeMove implements IGameUI {
+  /**
+     * CYX: add input manager and keyboard register
+     * @KeycodesMap the list of keyboard constants.
+     * This is used later for keyboard shortcuts
+  **/ 
+  private KeycodesMap = [
+    Phaser.Input.Keyboard.KeyCodes.ONE,
+    Phaser.Input.Keyboard.KeyCodes.TWO,
+    Phaser.Input.Keyboard.KeyCodes.THREE,
+    Phaser.Input.Keyboard.KeyCodes.FOUR
+  ];
   private uiContainer: Phaser.GameObjects.Container | undefined;
   /**
    * Set the location preview sprite to the given asset key.
@@ -82,7 +93,7 @@ class GameModeMove implements IGameUI {
       numItemLimit: 1,
       maxYSpace: MoveModeConstants.button.ySpace
     });
-    var id = 0;
+    let id = 0;
     moveMenuContainer.add(
       buttons.map((button, index) => {
         id++;
@@ -177,29 +188,22 @@ class GameModeMove implements IGameUI {
     const gameManager = GameGlobalAPI.getInstance().getGameManager();
     this.uiContainer = this.createUIContainer();
     GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
-    /**
-     * CYX: add input manager and keyboard register
-     * */ 
-    const KeycodesMap = [
-      Phaser.Input.Keyboard.KeyCodes.Q,
-      Phaser.Input.Keyboard.KeyCodes.W,
-      Phaser.Input.Keyboard.KeyCodes.A
-    ];
+  
+
+    //CYX: create new inputManager when the Game Move mode is activated
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
     inputManager.enableKeyboardInput(true);
     const navList2 : string[] = this.getLatestNavigations();
     console.log("check for array: " + navList2);
     console.log("check for array element: " + navList2[0]);
+    
     let count = 0;
     navList2.forEach(nav => {
       inputManager.registerKeyboardListener(
-        KeycodesMap[count],
+        this.KeycodesMap[count],
         'up',
         async () => {
-          console.log(navList2);
-          const val : string = nav;
-          console.log("check for value: " + val);
-          console.log("Test under move mode");
+          console.log("check for value: " + nav);
           await GameGlobalAPI.getInstance().swapPhase(GamePhaseType.Sequence);
           await GameGlobalAPI.getInstance().changeLocationTo(nav);
         }
@@ -228,16 +232,10 @@ class GameModeMove implements IGameUI {
      * CYX: remove input manager and keyboard register
      * */ 
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    inputManager.enableKeyboardInput(true);
     const navList = this.getLatestNavigations();
-    const KeycodesMap = [
-      Phaser.Input.Keyboard.KeyCodes.Q,
-      Phaser.Input.Keyboard.KeyCodes.W,
-      Phaser.Input.Keyboard.KeyCodes.A,
-    ];
-    for(var i = 0; i < navList.length; i++) {
+    for(let i = 0; i < navList.length; i++) {
       inputManager.clearKeyboardListener(
-        KeycodesMap[i]  
+        this.KeycodesMap[i]  
       );
     }
     if (this.uiContainer) {
