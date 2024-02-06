@@ -1,3 +1,4 @@
+//CYX: use keyboard shortcuts to navigate around different locations
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
 import CommonBackButton from '../../commons/CommonBackButton';

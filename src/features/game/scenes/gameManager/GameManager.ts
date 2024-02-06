@@ -17,6 +17,7 @@ import { addLoadingScreen } from '../../effects/LoadingScreen';
 import GameEscapeManager from '../../escape/GameEscapeManager';
 import GameInputManager from '../../input/GameInputManager';
 import GameLayerManager from '../../layer/GameLayerManager';
+
 import { Layer } from '../../layer/GameLayerTypes';
 import { LocationId } from '../../location/GameMapTypes';
 import GameLogManager from '../../log/GameLogManager';
@@ -31,7 +32,8 @@ import GameToolbarManager from '../../toolbar/GameToolbarManager';
 import { mandatory, sleep, toS3Path } from '../../utils/GameUtils';
 import GameGlobalAPI from './GameGlobalAPI';
 import { createGamePhases } from './GameManagerHelper';
-
+import { GameMode } from '../../mode/GameModeTypes';
+import { GameItemType } from '../../location/GameMapTypes';
 type GameManagerProps = {
   continueGame: boolean;
   chapterNum: number;
@@ -72,6 +74,7 @@ class GameManager extends Phaser.Scene {
   private toolbarManager?: GameToolbarManager;
   private taskLogManager?: GameTaskLogManager;
   private dashboardManager?: GameDashboardManager;
+ 
 
   constructor() {
     super('GameManager');
@@ -263,7 +266,9 @@ class GameManager extends Phaser.Scene {
   /**
    * Bind escape menu and dashboard to keyboard triggers.
    */
+  
   private bindKeyboardTriggers() {
+
     this.getInputManager().registerKeyboardListener(
       Phaser.Input.Keyboard.KeyCodes.ESC,
       'up',
@@ -275,6 +280,7 @@ class GameManager extends Phaser.Scene {
         }
       }
     );
+
     this.getInputManager().registerKeyboardListener(
       Phaser.Input.Keyboard.KeyCodes.TAB,
       'up',
@@ -288,6 +294,85 @@ class GameManager extends Phaser.Scene {
         }
       }
     );
+
+    
+    //CYX: display information about current modes
+    this.getInputManager().registerKeyboardListener(
+      Phaser.Input.Keyboard.KeyCodes.I,
+      "up",
+      async () => {
+        const modes = this.checkCurrentLocations();
+        console.log(modes); //CYX: testing the lists of modes
+        console.log(modes.includes("Move"));
+        console.log(modes.includes("Explore"));
+        console.log(modes.includes("Talk"));
+      }
+    );
+
+    //CYX: for gameinput manager
+    this.getInputManager().registerKeyboardListener(
+      Phaser.Input.Keyboard.KeyCodes.M,
+      'up',
+      async () => {
+        console.log("Start");
+        const modes = this.checkCurrentLocations()
+        if (modes.includes("Move") && 
+          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
+          await this.getPhaseManager().pushPhase(GamePhaseType.Move);
+        }else if(this.getPhaseManager().isCurrentPhase(GamePhaseType.Move)){
+          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
+        }
+      }
+    );
+
+    //CYX: to register keyboard listener for Explore mode
+    this.getInputManager().registerKeyboardListener(
+      Phaser.Input.Keyboard.KeyCodes.E,
+      'up',
+      async () => {
+        console.log("Start");
+        const modes = this.checkCurrentLocations();
+        if (modes.includes("Explore") && 
+          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
+          await this.getPhaseManager().pushPhase(GamePhaseType.Explore);
+        }else if(this.getPhaseManager().isCurrentPhase(GamePhaseType.Explore)){
+          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
+        }
+      }
+    );
+
+    //CYX: to register keyboard listener for Talk mode
+    this.getInputManager().registerKeyboardListener(
+      Phaser.Input.Keyboard.KeyCodes.T,
+      'up',
+      async () => {
+        console.log("Start Talk");
+        const modes = this.checkCurrentLocations();
+        if (modes.includes("Talk") && 
+          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
+          await this.getPhaseManager().pushPhase(GamePhaseType.Talk);
+        }else if(this.getPhaseManager().isCurrentPhase(GamePhaseType.Talk) 
+          || this.getPhaseManager().isCurrentPhase(GamePhaseType.Sequence)){
+          console.log("invalid input");
+        }
+      }
+    );
+  }
+
+  // CYX: Create a function to check the current locations available in current phase
+  private checkCurrentLocations(){
+      //CYX: get location modes
+      let modes : any[]= this.getStateManager().getLocationModes(this.currentLocationId);
+      const talkTopics = GameGlobalAPI.getInstance().getGameItemsInLocation(
+        GameItemType.talkTopics,
+        this.currentLocationId
+      );
+
+      // Remove talk mode if there is no talk topics
+      if (talkTopics.length === 0) {
+        modes = modes.filter(mode => mode !== GameMode.Talk);
+      }
+      return modes;
   }
 
   /**
@@ -339,7 +424,7 @@ class GameManager extends Phaser.Scene {
     await this.getActionManager().processGameActions(
       this.getStateManager().getGameMap().getCheckpointCompleteActions()
     );
-
+    
     // Reset input and cursor, in case it is changed after story complete actions
     this.getInputManager().setDefaultCursor(Constants.defaultCursor);
     this.getInputManager().enableMouseInput(true);

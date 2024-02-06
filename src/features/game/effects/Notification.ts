@@ -10,6 +10,8 @@ import SourceAcademyGame from '../SourceAcademyGame';
 import { sleep } from '../utils/GameUtils';
 import { createBitmapText } from '../utils/TextUtils';
 import { fadeAndDestroy, fadeIn } from './FadeEffect';
+//CYX: create input manager
+import GameInputManager from '../input/GameInputManager';
 
 const notifStyle: BitmapFontStyle = {
   key: FontAssets.alienLeagueFont.key,
@@ -34,6 +36,7 @@ const notifTextConfig = {
 export async function displayNotification(scene: IBaseScene, message: string): Promise<void> {
   const dialogueRenderer = new DialogueRenderer({});
   const container = dialogueRenderer.getDialogueContainer();
+  
 
   scene.getLayerManager().addToLayer(Layer.Effects, container);
   scene.getLayerManager().fadeInLayer(Layer.Effects);
@@ -47,7 +50,24 @@ export async function displayNotification(scene: IBaseScene, message: string): P
   // Wait for fade in to finish
   await sleep(Constants.fadeDuration * 2);
 
+  //CYX: create Keyboard shortcut for switching between Location to Menu mode
+  
   const showNotification = new Promise<void>(resolve => {
+    const KeyboardManager = new GameInputManager(scene);
+    KeyboardManager.enableKeyboardInput(true);
+    KeyboardManager.registerKeyboardListener(
+      Phaser.Input.Keyboard.KeyCodes.SPACE,
+      "up",
+      async () => {
+        //console.log("notification pressed");
+        KeyboardManager.clearKeyboardListener(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
+        fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });
+        dialogueRenderer.destroy();
+        resolve();
+      }
+    )
+
     dialogueRenderer.getDialogueBox().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
       SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
       fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });

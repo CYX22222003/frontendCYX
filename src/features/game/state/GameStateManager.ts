@@ -192,6 +192,8 @@ class GameStateManager {
    * @param locationId location ID
    * @returns {GameMode[]} game modes
    */
+
+  //CYX: may be used to get the location modes so as to enable OR disable certian keyboard motion
   public getLocationModes(locationId: LocationId): GameMode[] {
     return Array.from(this.gameMap.getLocationAtId(locationId).modes) || [];
   }

@@ -1,5 +1,5 @@
+//CYX: add keyboard shortcuts to select talk topics
 import GameGlobalAPI from 'src/features/game/scenes/gameManager/GameGlobalAPI';
-
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
 import CommonBackButton from '../../commons/CommonBackButton';
