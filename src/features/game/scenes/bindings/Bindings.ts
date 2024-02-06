@@ -97,6 +97,22 @@ class Bindings extends Phaser.Scene {
       {
         key: 'Tab',
         text: 'Dashboard'
+      },
+      {
+        key: 'Space',
+        text: 'Proceed to next dialogue line OR enter a location'
+      },
+      {
+        key: 'M',
+        text: "Move mode"
+      },
+      {
+        key: "T",
+        text: "Talk mode"
+      },
+      {
+        key: "E",
+        text: "Move mode"
       }
     ];
   }
