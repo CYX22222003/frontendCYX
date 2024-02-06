@@ -357,8 +357,11 @@ class GameManager extends Phaser.Scene {
         }
       }
     );
+<<<<<<< HEAD
 
     //register keyboard listener for move mode navigation
+=======
+>>>>>>> 9565c08a (add new keyboard shortcuts)
   }
 
   // CYX: Create a function to check the current locations available in current phase
