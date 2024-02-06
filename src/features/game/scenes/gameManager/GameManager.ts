@@ -357,14 +357,11 @@ class GameManager extends Phaser.Scene {
         }
       }
     );
-<<<<<<< HEAD
 
     //register keyboard listener for move mode navigation
-=======
->>>>>>> 9565c08a (add new keyboard shortcuts)
   }
 
-  // CYX: Create a function to check the current locations available in current phase
+  // CYX: Create a function to check the currentns available in current phase
   private checkCurrentLocations(){
       //CYX: get location modes
       let modes : any[]= this.getStateManager().getLocationModes(this.currentLocationId);
