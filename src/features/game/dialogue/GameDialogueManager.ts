@@ -8,7 +8,6 @@ import { textTypeWriterStyle } from './GameDialogueConstants';
 import DialogueGenerator from './GameDialogueGenerator';
 import DialogueRenderer from './GameDialogueRenderer';
 import DialogueSpeakerRenderer from './GameDialogueSpeakerRenderer';
-//CYX thought: try to create a listener from GroupInputManager and enable the keyboard input listener
 import GameInputManager from '../input/GameInputManager'; 
 
 /**
@@ -25,6 +24,7 @@ export default class DialogueManager{
   //CYX: try to enable keyboard input
   private KeyBoardManager? : GameInputManager = 
   new GameInputManager(GameGlobalAPI.getInstance().getGameManager());
+
   /**
    * @param dialogueId the dialogue Id of the dialogue you want to play
    *
@@ -98,6 +98,16 @@ export default class DialogueManager{
     // to prevent an accumulation of keyboard listners
     if (!line) {
       this.getKeyBoardManager().clearKeyboardListener(Phaser.Input.Keyboard.KeyCodes.SPACE);
+      // const talkTopics = GameGlobalAPI.getInstance().getGameItemsInLocation(
+      //   GameItemType.talkTopics,
+      //   GameGlobalAPI.getInstance().getCurrLocId()
+      // );
+      // talkTopics.forEach(dialogueId => {
+      //   console.log("clearing exixting listener: " + this.KeycodesMap[talkTopics.indexOf(dialogueId)]);
+      //   this.getKeyBoardManager().clearKeyboardListener(
+      //     this.KeycodesMap[talkTopics.indexOf(dialogueId)]
+      //   );
+      // });
       resolve();}
   }
 
