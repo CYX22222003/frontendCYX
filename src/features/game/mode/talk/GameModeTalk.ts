@@ -63,7 +63,7 @@ class GameModeTalk implements IGameUI {
     talkMenuContainer.add(
       buttons.map((button, index) =>
         this.createTalkTopicButton(
-          (topicId++) + ": " + button.text,
+          (topicId++) + 1 + ": " + button.text,
           buttonPositions[index][0],
           buttonPositions[index][1],
           button.callback
