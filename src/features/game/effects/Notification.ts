@@ -10,8 +10,8 @@ import SourceAcademyGame from '../SourceAcademyGame';
 import { sleep } from '../utils/GameUtils';
 import { createBitmapText } from '../utils/TextUtils';
 import { fadeAndDestroy, fadeIn } from './FadeEffect';
-//CYX: create input manager
 import GameInputManager from '../input/GameInputManager';
+import { keyboardShortcuts } from '../commons/CommonConstants';
 
 const notifStyle: BitmapFontStyle = {
   key: FontAssets.alienLeagueFont.key,
@@ -50,21 +50,23 @@ export async function displayNotification(scene: IBaseScene, message: string): P
   // Wait for fade in to finish
   await sleep(Constants.fadeDuration * 2);
 
-  //CYX: keyboard shortcut shortcut to dissolve location notifications
+  // create new keyboard manager
+  const KeyBoardManager = new GameInputManager(scene);
+  // enable keyboard input
+  KeyBoardManager.enableKeyboardInput(true);
   const showNotification = new Promise<void>(resolve => {
-    const KeyboardManager = new GameInputManager(scene);
-    KeyboardManager.enableKeyboardInput(true);
-    KeyboardManager.registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.SPACE,
-      "up",
+    // using the same binding as dialogue shortcut
+    KeyBoardManager.registerKeyboardListener(
+      keyboardShortcuts.dissolveNotification,
+      'up',
       async () => {
-        KeyboardManager.clearKeyboardListener(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        console.log("Space for notification pressed");
+        KeyBoardManager.clearKeyboardListener(keyboardShortcuts.dissolveNotification);
         SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
         fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });
         dialogueRenderer.destroy();
         resolve();
-      }
-    )
+    });
 
     dialogueRenderer.getDialogueBox().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
       SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);

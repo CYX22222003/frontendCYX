@@ -8,7 +8,9 @@ import { textTypeWriterStyle } from './GameDialogueConstants';
 import DialogueGenerator from './GameDialogueGenerator';
 import DialogueRenderer from './GameDialogueRenderer';
 import DialogueSpeakerRenderer from './GameDialogueSpeakerRenderer';
-import GameInputManager from '../input/GameInputManager'; 
+
+import GameInputManager from '../input/GameInputManager';
+import { keyboardShortcuts } from '../commons/CommonConstants';
 
 /**
  * Given a dialogue Id, this manager renders the correct dialogue.
@@ -21,9 +23,6 @@ export default class DialogueManager{
   private speakerRenderer?: DialogueSpeakerRenderer;
   private dialogueRenderer?: DialogueRenderer;
   private dialogueGenerator?: DialogueGenerator;
-  //CYX: try to enable keyboard input
-  private KeyBoardManager? : GameInputManager = 
-  new GameInputManager(GameGlobalAPI.getInstance().getGameManager());
 
   /**
    * @param dialogueId the dialogue Id of the dialogue you want to play
@@ -36,6 +35,7 @@ export default class DialogueManager{
     this.dialogueRenderer = new DialogueRenderer(textTypeWriterStyle);
     this.dialogueGenerator = new DialogueGenerator(dialogue.content);
     this.speakerRenderer = new DialogueSpeakerRenderer();
+
     GameGlobalAPI.getInstance().addToLayer(
       Layer.Dialogue,
       this.dialogueRenderer.getDialogueContainer()
@@ -49,20 +49,11 @@ export default class DialogueManager{
 
   private async playWholeDialogue(resolve: () => void) {
     await this.showNextLine(resolve);
-     this.getKeyBoardManager().enableKeyboardInput(true);
-     // CYX: modification, issues: this may tend to skip some lines, especially in the teleportation bay
-     this.getKeyBoardManager()
-     .registerKeyboardListener(
-       Phaser.Input.Keyboard.KeyCodes.SPACE, 'up', async () => {
-         await this.showNextLine(resolve);
-         console.log('Space key pressed!');   
-       }
-     );
-
-    
-    
-    //CYX: remove keyboard listener
-
+    // add keyboard listener for dialogue box 
+    this.getKeyBoardManager().registerKeyboardListener(
+      keyboardShortcuts.nextDialogue,
+      'up',
+      async () => {console.log("Space pressed"); await this.showNextLine(resolve);});
     this.getDialogueRenderer()
       .getDialogueBox()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, async () => {
@@ -94,27 +85,17 @@ export default class DialogueManager{
     }
     await GameGlobalAPI.getInstance().processGameActionsInSamePhase(actionIds);
     GameGlobalAPI.getInstance().enableSprite(this.getDialogueRenderer().getDialogueBox(), true);
-    //CYX: clear all keyboardlistenrs for Keycodes A when the dialogue is finished 
-    // to prevent an accumulation of keyboard listners
+
     if (!line) {
-      this.getKeyBoardManager().clearKeyboardListener(Phaser.Input.Keyboard.KeyCodes.SPACE);
-      // const talkTopics = GameGlobalAPI.getInstance().getGameItemsInLocation(
-      //   GameItemType.talkTopics,
-      //   GameGlobalAPI.getInstance().getCurrLocId()
-      // );
-      // talkTopics.forEach(dialogueId => {
-      //   console.log("clearing exixting listener: " + this.KeycodesMap[talkTopics.indexOf(dialogueId)]);
-      //   this.getKeyBoardManager().clearKeyboardListener(
-      //     this.KeycodesMap[talkTopics.indexOf(dialogueId)]
-      //   );
-      // });
-      resolve();}
+      // clear keyboard listeners when dialogue ends
+      this.getKeyBoardManager().clearKeyboardListener(keyboardShortcuts.nextDialogue);
+      resolve();
+    }
   }
 
   private getDialogueGenerator = () => this.dialogueGenerator as DialogueGenerator;
   private getDialogueRenderer = () => this.dialogueRenderer as DialogueRenderer;
   private getSpeakerRenderer = () => this.speakerRenderer as DialogueSpeakerRenderer;
-  //CYX add for get keyboard manager
-  private getKeyBoardManager = () => this.KeyBoardManager as GameInputManager;
+
   public getUsername = () => SourceAcademyGame.getInstance().getAccountInfo().name;
 }

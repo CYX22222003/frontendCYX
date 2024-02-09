@@ -32,8 +32,11 @@ import GameToolbarManager from '../../toolbar/GameToolbarManager';
 import { mandatory, sleep, toS3Path } from '../../utils/GameUtils';
 import GameGlobalAPI from './GameGlobalAPI';
 import { createGamePhases } from './GameManagerHelper';
-import { GameMode } from '../../mode/GameModeTypes';
+
 import { GameItemType } from '../../location/GameMapTypes';
+import { GameMode } from '../../mode/GameModeTypes';
+import { keyboardShortcuts } from '../../commons/CommonConstants';
+
 type GameManagerProps = {
   continueGame: boolean;
   chapterNum: number;
@@ -270,7 +273,7 @@ class GameManager extends Phaser.Scene {
   private bindKeyboardTriggers() {
 
     this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.ESC,
+      keyboardShortcuts.escapeMenu,
       'up',
       async () => {
         if (this.getPhaseManager().isCurrentPhaseTerminal()) {
@@ -282,7 +285,7 @@ class GameManager extends Phaser.Scene {
     );
 
     this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.TAB,
+      keyboardShortcuts.dashboard,
       'up',
       async () => {
         if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Dashboard)) {
@@ -294,87 +297,75 @@ class GameManager extends Phaser.Scene {
         }
       }
     );
-
-    
-    //CYX: display information about current modes
     this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.I,
-      "up",
-      async () => {
-        const modes = this.checkCurrentLocations();
-        console.log(modes); //CYX: testing the lists of modes
-        console.log(modes.includes("Move"));
-        console.log(modes.includes("Explore"));
-        console.log(modes.includes("Talk"));
-      }
-    );
-
-    //CYX: for gameinput manager
-    this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.M,
+      Phaser.Input.Keyboard.KeyCodes.A,
       'up',
       async () => {
-        console.log("Start");
-        const modes = this.checkCurrentLocations()
-        if (modes.includes("Move") && 
+        const modes = this.getCurrentLocationModes();
+        console.log(modes);
+      }
+    );
+    this.getInputManager().registerKeyboardListener(
+      keyboardShortcuts.explore,
+      'up',
+      async () => {
+        const modes = this.getCurrentLocationModes();
+        console.log("E pressed");
+        if (modes.includes(GameMode.Explore) && 
+            this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
+          await this.getPhaseManager().pushPhase(GamePhaseType.Explore);
+        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Explore)) {
+          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
+        }
+      }
+    );
+    this.getInputManager().registerKeyboardListener(
+      keyboardShortcuts.move,
+      'up',
+      async () => {
+        const modes = this.getCurrentLocationModes();
+        console.log("M pressed");
+        if (modes.includes(GameMode.Move) &&
           this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
           await this.getPhaseManager().pushPhase(GamePhaseType.Move);
-        }else if(this.getPhaseManager().isCurrentPhase(GamePhaseType.Move)){
+        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Move)) {
           await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
         }
       }
     );
-
-    //CYX: to register keyboard listener for Explore mode
     this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.E,
+      keyboardShortcuts.talk,
       'up',
       async () => {
-        console.log("Start");
-        const modes = this.checkCurrentLocations();
-        if (modes.includes("Explore") && 
-          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
-          await this.getPhaseManager().pushPhase(GamePhaseType.Explore);
-        }else if(this.getPhaseManager().isCurrentPhase(GamePhaseType.Explore)){
-          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
-        }
-      }
-    );
-
-    //CYX: to register keyboard listener for Talk mode
-    this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.T,
-      'up',
-      async () => {
-        console.log("Start Talk");
-        const modes = this.checkCurrentLocations();
-        if (modes.includes("Talk") && 
+        const modes = this.getCurrentLocationModes();
+        console.log("T pressed");
+        if (modes.includes(GameMode.Talk) &&
           this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
           await this.getPhaseManager().pushPhase(GamePhaseType.Talk);
-        }else if(this.getPhaseManager().isCurrentPhase(GamePhaseType.Talk) 
-          || this.getPhaseManager().isCurrentPhase(GamePhaseType.Sequence)){
-          console.log("invalid input");
+        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Talk)) {
+          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
         }
       }
     );
-
-    //register keyboard listener for move mode navigation
   }
 
-  // CYX: Create a function to check the currentns available in current phase
-  private checkCurrentLocations(){
-      //CYX: get location modes
-      let modes : any[]= this.getStateManager().getLocationModes(this.currentLocationId);
-      const talkTopics = GameGlobalAPI.getInstance().getGameItemsInLocation(
-        GameItemType.talkTopics,
-        this.currentLocationId
-      );
+  /**
+   * the same method from GameModeMenu to get the available modes under current location
+   */
+  private getCurrentLocationModes() {
+    const currLocId = this.currentLocationId;
+    let latestModesInLoc = this.getStateManager().getLocationModes(currLocId);
+    const talkTopics = GameGlobalAPI.getInstance().getGameItemsInLocation(
+      GameItemType.talkTopics,
+      currLocId
+    );
 
-      // Remove talk mode if there is no talk topics
-      if (talkTopics.length === 0) {
-        modes = modes.filter(mode => mode !== GameMode.Talk);
-      }
-      return modes;
+    // Remove talk mode if there is no talk topics
+    if (talkTopics.length === 0) {
+      latestModesInLoc = latestModesInLoc.filter(mode => mode !== GameMode.Talk);
+    }
+
+    return latestModesInLoc;
   }
 
   /**

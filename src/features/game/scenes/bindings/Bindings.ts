@@ -91,7 +91,7 @@ class Bindings extends Phaser.Scene {
   private getBindings() {
     return [
       {
-        key: 'Esc',
+        key: 'ESC',
         text: 'Escape Menu'
       },
       {
