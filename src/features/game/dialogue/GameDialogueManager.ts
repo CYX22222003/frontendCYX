@@ -23,6 +23,7 @@ export default class DialogueManager{
   private speakerRenderer?: DialogueSpeakerRenderer;
   private dialogueRenderer?: DialogueRenderer;
   private dialogueGenerator?: DialogueGenerator;
+  private KeyBoardManager?: GameInputManager = new GameInputManager(GameGlobalAPI.getInstance().getGameManager());
 
   /**
    * @param dialogueId the dialogue Id of the dialogue you want to play
@@ -96,6 +97,7 @@ export default class DialogueManager{
   private getDialogueGenerator = () => this.dialogueGenerator as DialogueGenerator;
   private getDialogueRenderer = () => this.dialogueRenderer as DialogueRenderer;
   private getSpeakerRenderer = () => this.speakerRenderer as DialogueSpeakerRenderer;
+  private getKeyBoardManager = () => this.KeyBoardManager as GameInputManager;
 
   public getUsername = () => SourceAcademyGame.getInstance().getAccountInfo().name;
 }
