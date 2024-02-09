@@ -9,6 +9,9 @@ import DialogueGenerator from './GameDialogueGenerator';
 import DialogueRenderer from './GameDialogueRenderer';
 import DialogueSpeakerRenderer from './GameDialogueSpeakerRenderer';
 
+import GameInputManager from '../input/GameInputManager';
+import { keyboardShortcuts } from '../commons/CommonConstants';
+
 /**
  * Given a dialogue Id, this manager renders the correct dialogue.
  * It displays the lines, speakers, and performs actions
@@ -18,6 +21,7 @@ export default class DialogueManager {
   private speakerRenderer?: DialogueSpeakerRenderer;
   private dialogueRenderer?: DialogueRenderer;
   private dialogueGenerator?: DialogueGenerator;
+  private keyboardManager?: GameInputManager;
 
   /**
    * @param dialogueId the dialogue Id of the dialogue you want to play
@@ -30,6 +34,7 @@ export default class DialogueManager {
     this.dialogueRenderer = new DialogueRenderer(textTypeWriterStyle);
     this.dialogueGenerator = new DialogueGenerator(dialogue.content);
     this.speakerRenderer = new DialogueSpeakerRenderer();
+    this.keyboardManager = new GameInputManager(GameGlobalAPI.getInstance().getGameManager());
 
     GameGlobalAPI.getInstance().addToLayer(
       Layer.Dialogue,
@@ -44,6 +49,11 @@ export default class DialogueManager {
 
   private async playWholeDialogue(resolve: () => void) {
     await this.showNextLine(resolve);
+    // add keyboard listener for dialogue box 
+    this.getKeyBoardManager().registerKeyboardListener(
+      keyboardShortcuts.nextDialogue,
+      'up',
+      async () => {console.log("Space pressed"); await this.showNextLine(resolve);});
     this.getDialogueRenderer()
       .getDialogueBox()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, async () => await this.showNextLine(resolve));
@@ -73,12 +83,17 @@ export default class DialogueManager {
     await GameGlobalAPI.getInstance().processGameActionsInSamePhase(actionIds);
     GameGlobalAPI.getInstance().enableSprite(this.getDialogueRenderer().getDialogueBox(), true);
 
-    if (!line) resolve();
+    if (!line) {
+      // clear keyboard listeners when dialogue ends
+      this.getKeyBoardManager().clearKeyboardListener(keyboardShortcuts.nextDialogue);
+      resolve();
+    }
   }
 
   private getDialogueGenerator = () => this.dialogueGenerator as DialogueGenerator;
   private getDialogueRenderer = () => this.dialogueRenderer as DialogueRenderer;
   private getSpeakerRenderer = () => this.speakerRenderer as DialogueSpeakerRenderer;
+  private getKeyBoardManager = () => this.keyboardManager as GameInputManager;
 
   public getUsername = () => SourceAcademyGame.getInstance().getAccountInfo().name;
 }
