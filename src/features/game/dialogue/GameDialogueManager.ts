@@ -71,7 +71,7 @@ export default class DialogueManager{
       });
   }
 
-  public async showNextLine(resolve: () => void) {
+  private async showNextLine(resolve: () => void) {
     GameGlobalAPI.getInstance().playSound(SoundAssets.dialogueAdvance.key);
     const { line, speakerDetail, actionIds, prompt } =
       await this.getDialogueGenerator().generateNextLine();

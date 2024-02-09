@@ -50,8 +50,7 @@ export async function displayNotification(scene: IBaseScene, message: string): P
   // Wait for fade in to finish
   await sleep(Constants.fadeDuration * 2);
 
-  //CYX: create Keyboard shortcut for switching between Location to Menu mode
-  
+  //CYX: keyboard shortcut shortcut to dissolve location notifications
   const showNotification = new Promise<void>(resolve => {
     const KeyboardManager = new GameInputManager(scene);
     KeyboardManager.enableKeyboardInput(true);
@@ -59,7 +58,6 @@ export async function displayNotification(scene: IBaseScene, message: string): P
       Phaser.Input.Keyboard.KeyCodes.SPACE,
       "up",
       async () => {
-        //console.log("notification pressed");
         KeyboardManager.clearKeyboardListener(Phaser.Input.Keyboard.KeyCodes.SPACE);
         SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
         fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });
