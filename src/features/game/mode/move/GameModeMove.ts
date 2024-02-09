@@ -1,3 +1,4 @@
+//CYX: use keyboard shortcuts to navigate around different locations
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
 import CommonBackButton from '../../commons/CommonBackButton';
@@ -13,6 +14,7 @@ import { createButton } from '../../utils/ButtonUtils';
 import { sleep } from '../../utils/GameUtils';
 import { calcTableFormatPos } from '../../utils/StyleUtils';
 import MoveModeConstants, { moveButtonStyle } from './GameModeMoveConstants';
+import { ItemId } from '../../commons/CommonTypes';
 
 /**
  * The class in charge of showing the "Move" UI
@@ -20,8 +22,18 @@ import MoveModeConstants, { moveButtonStyle } from './GameModeMoveConstants';
  * locations from one location
  */
 class GameModeMove implements IGameUI {
+  /**
+     * CYX: add input manager and keyboard register
+     * @KeycodesMap the list of keyboard constants.
+     * This is used later for keyboard shortcuts
+  **/ 
+  private KeycodesMap = [
+    Phaser.Input.Keyboard.KeyCodes.ONE,
+    Phaser.Input.Keyboard.KeyCodes.TWO,
+    Phaser.Input.Keyboard.KeyCodes.THREE,
+    Phaser.Input.Keyboard.KeyCodes.FOUR
+  ];
   private uiContainer: Phaser.GameObjects.Container | undefined;
-
   /**
    * Set the location preview sprite to the given asset key.
    *
@@ -38,7 +50,7 @@ class GameModeMove implements IGameUI {
   /**
    * Fetches the navigations of the current location id.
    */
-  private getLatestNavigations() {
+  private getLatestNavigations() : ItemId[] {
     return GameGlobalAPI.getInstance().getGameItemsInLocation(
       GameItemType.navigation,
       GameGlobalAPI.getInstance().getCurrLocId()
@@ -71,23 +83,28 @@ class GameModeMove implements IGameUI {
 
     // Add all navigation buttons
     const navigations = this.getLatestNavigations();
+    console.log(typeof navigations[0]);
+  
+    console.log(navigations);
+
     const buttons = this.getMoveButtons(navigations, previewFill);
     const buttonPositions = calcTableFormatPos({
       numOfItems: buttons.length,
       numItemLimit: 1,
       maxYSpace: MoveModeConstants.button.ySpace
     });
-
+    let id = 0;
     moveMenuContainer.add(
-      buttons.map((button, index) =>
-        this.createMoveButton(
-          button.text,
+      buttons.map((button, index) => {
+        id++;
+        return this.createMoveButton(
+          id + ": " + button.text,
           buttonPositions[index][0] + MoveModeConstants.button.xOffSet,
           buttonPositions[index][1],
           button.callback,
           button.onHover,
           button.onOut
-        )
+        ); }
       )
     );
 
@@ -162,6 +179,32 @@ class GameModeMove implements IGameUI {
   }
 
   /**
+   * This function is to register keyboard listeners for location selection
+   * This will only be called by activateUI function
+   * */ 
+  private registerKeyboardListener() : void {
+    //CYX: create new inputManager when the Game Move mode is activated
+    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
+    inputManager.enableKeyboardInput(true);
+    const navList2 : string[] = this.getLatestNavigations();
+    
+    let count = 0;
+    navList2.forEach(nav => {
+      inputManager.registerKeyboardListener(
+        this.KeycodesMap[count],
+        'up',
+        async () => {
+          console.log("check for value: " + nav);
+          await GameGlobalAPI.getInstance().swapPhase(GamePhaseType.Sequence);
+          await GameGlobalAPI.getInstance().changeLocationTo(nav);
+        }
+      );
+      count += 1;
+    }
+    )
+  }
+
+  /**
    * Activate the 'Move' mode UI.
    *
    * Usually only called by the phase manager when 'Move' phase is
@@ -172,13 +215,30 @@ class GameModeMove implements IGameUI {
     this.uiContainer = this.createUIContainer();
     GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
 
-    this.uiContainer.setPosition(this.uiContainer.x, -screenSize.y);
+    this.registerKeyboardListener();
 
+    this.uiContainer.setPosition(this.uiContainer.x, -screenSize.y);
     gameManager.tweens.add({
       targets: this.uiContainer,
       ...entryTweenProps
     });
     GameGlobalAPI.getInstance().playSound(SoundAssets.modeEnter.key);
+  }
+  /**
+   * Remove keyboard listners for location selection 
+   * when Move mode is transitioned out
+   * 
+   * */ 
+
+  private removeKeyboardListner() : void {
+    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
+    const navList = this.getLatestNavigations();
+    navList.forEach( nav => {
+      inputManager.clearKeyboardListener(
+        this.KeycodesMap[navList.indexOf(nav)]  
+      );
+    }
+    );
   }
 
   /**
@@ -189,7 +249,7 @@ class GameModeMove implements IGameUI {
    */
   public async deactivateUI(): Promise<void> {
     const gameManager = GameGlobalAPI.getInstance().getGameManager();
-
+    this.removeKeyboardListner();
     if (this.uiContainer) {
       this.uiContainer.setPosition(this.uiContainer.x, 0);
 

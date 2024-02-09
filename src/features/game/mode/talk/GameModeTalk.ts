@@ -1,5 +1,5 @@
+//CYX: add keyboard shortcuts to select talk topics
 import GameGlobalAPI from 'src/features/game/scenes/gameManager/GameGlobalAPI';
-
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
 import CommonBackButton from '../../commons/CommonBackButton';
@@ -22,6 +22,14 @@ import TalkModeConstants, { talkButtonStyle } from './GameModeTalkConstants';
  */
 class GameModeTalk implements IGameUI {
   private uiContainer: Phaser.GameObjects.Container | undefined;
+
+  //CYX: add key codes array.
+  private KeycodesMap = [
+    Phaser.Input.Keyboard.KeyCodes.ONE,
+    Phaser.Input.Keyboard.KeyCodes.TWO,
+    Phaser.Input.Keyboard.KeyCodes.THREE,
+    Phaser.Input.Keyboard.KeyCodes.FOUR
+  ];
 
   /**
    * Fetches the talk topics of the current location id.
@@ -51,17 +59,17 @@ class GameModeTalk implements IGameUI {
       maxYSpace: TalkModeConstants.button.ySpace
     });
 
+    let topicId = 0; 
     talkMenuContainer.add(
       buttons.map((button, index) =>
         this.createTalkTopicButton(
-          button.text,
+          (topicId++) + 1 + ": " + button.text,
           buttonPositions[index][0],
           buttonPositions[index][1],
           button.callback
         )
       )
     );
-
     // Add check for interacted talk topics
     buttons.forEach((button, index) => {
       const checkedSprite = new Phaser.GameObjects.Sprite(
@@ -130,6 +138,35 @@ class GameModeTalk implements IGameUI {
   }
 
   /**
+   * CYX
+   * Register keyboard listners for talk topic selection
+   * 
+   * This is called by the activeUI function
+   * */ 
+
+  private registerKeyboardListner() : void {
+    const talkTopics : ItemId[] = this.getLatestTalkTopics();
+    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
+    inputManager.enableKeyboardInput(true);
+    let count = 0;
+    console.log(talkTopics);
+    talkTopics.forEach(
+      (dialogueId : ItemId) => {
+        console.log("register " + dialogueId);
+        inputManager.registerKeyboardListener(
+          this.KeycodesMap[count],
+          "up",
+          async () => {
+            GameGlobalAPI.getInstance().triggerInteraction(dialogueId);
+            await GameGlobalAPI.getInstance().showDialogue(dialogueId);
+          }
+        );
+        count += 1;
+      }
+    );
+  }
+
+  /**
    * Activate the 'Talk' mode UI.
    *
    * Usually only called by the phase manager when 'Talk' phase is
@@ -139,6 +176,9 @@ class GameModeTalk implements IGameUI {
     const gameManager = GameGlobalAPI.getInstance().getGameManager();
     this.uiContainer = this.createUIContainer();
     GameGlobalAPI.getInstance().addToLayer(Layer.UI, this.uiContainer);
+    
+    //CYX: create new input manager when the Game talk topics is presented
+    this.registerKeyboardListner();
 
     this.uiContainer.setPosition(this.uiContainer.x, -screenSize.y);
 
@@ -150,6 +190,22 @@ class GameModeTalk implements IGameUI {
   }
 
   /**
+   * Remove keyboard listners for topic selection after a topic is selected
+   * 
+   * */ 
+  private removeKeyboardListner() : void {
+    const talkTopics = this.getLatestTalkTopics();
+    const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
+    
+    talkTopics.forEach(dialogueId => {
+      console.log("clearing exixting listener: " + this.KeycodesMap[talkTopics.indexOf(dialogueId)]);
+      inputManager.clearKeyboardListener(
+        this.KeycodesMap[talkTopics.indexOf(dialogueId)]
+      );
+    });
+  }
+
+  /**
    * Deactivate the 'Talk' mode UI.
    *
    * Usually only called by the phase manager when 'Talk' phase is
@@ -157,6 +213,7 @@ class GameModeTalk implements IGameUI {
    */
   public async deactivateUI(): Promise<void> {
     const gameManager = GameGlobalAPI.getInstance().getGameManager();
+    this.removeKeyboardListner();
     if (this.uiContainer) {
       this.uiContainer.setPosition(this.uiContainer.x, 0);
 
@@ -164,9 +221,10 @@ class GameModeTalk implements IGameUI {
         targets: this.uiContainer,
         ...exitTweenProps
       });
-
+      
       await sleep(500);
       fadeAndDestroy(gameManager, this.uiContainer);
+      
     }
   }
 }

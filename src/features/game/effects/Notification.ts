@@ -10,6 +10,8 @@ import SourceAcademyGame from '../SourceAcademyGame';
 import { sleep } from '../utils/GameUtils';
 import { createBitmapText } from '../utils/TextUtils';
 import { fadeAndDestroy, fadeIn } from './FadeEffect';
+import GameInputManager from '../input/GameInputManager';
+import { keyboardShortcuts } from '../commons/CommonConstants';
 
 const notifStyle: BitmapFontStyle = {
   key: FontAssets.alienLeagueFont.key,
@@ -34,6 +36,7 @@ const notifTextConfig = {
 export async function displayNotification(scene: IBaseScene, message: string): Promise<void> {
   const dialogueRenderer = new DialogueRenderer({});
   const container = dialogueRenderer.getDialogueContainer();
+  
 
   scene.getLayerManager().addToLayer(Layer.Effects, container);
   scene.getLayerManager().fadeInLayer(Layer.Effects);
@@ -47,7 +50,24 @@ export async function displayNotification(scene: IBaseScene, message: string): P
   // Wait for fade in to finish
   await sleep(Constants.fadeDuration * 2);
 
+  // create new keyboard manager
+  const KeyBoardManager = new GameInputManager(scene);
+  // enable keyboard input
+  KeyBoardManager.enableKeyboardInput(true);
   const showNotification = new Promise<void>(resolve => {
+    // using the same binding as dialogue shortcut
+    KeyBoardManager.registerKeyboardListener(
+      keyboardShortcuts.dissolveNotification,
+      'up',
+      async () => {
+        console.log("Space for notification pressed");
+        KeyBoardManager.clearKeyboardListener(keyboardShortcuts.dissolveNotification);
+        SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
+        fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });
+        dialogueRenderer.destroy();
+        resolve();
+    });
+
     dialogueRenderer.getDialogueBox().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
       SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
       fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });

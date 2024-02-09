@@ -17,6 +17,7 @@ import { addLoadingScreen } from '../../effects/LoadingScreen';
 import GameEscapeManager from '../../escape/GameEscapeManager';
 import GameInputManager from '../../input/GameInputManager';
 import GameLayerManager from '../../layer/GameLayerManager';
+
 import { Layer } from '../../layer/GameLayerTypes';
 import { LocationId } from '../../location/GameMapTypes';
 import GameLogManager from '../../log/GameLogManager';
@@ -31,6 +32,10 @@ import GameToolbarManager from '../../toolbar/GameToolbarManager';
 import { mandatory, sleep, toS3Path } from '../../utils/GameUtils';
 import GameGlobalAPI from './GameGlobalAPI';
 import { createGamePhases } from './GameManagerHelper';
+
+import { GameItemType } from '../../location/GameMapTypes';
+import { GameMode } from '../../mode/GameModeTypes';
+import { keyboardShortcuts } from '../../commons/CommonConstants';
 
 type GameManagerProps = {
   continueGame: boolean;
@@ -72,6 +77,7 @@ class GameManager extends Phaser.Scene {
   private toolbarManager?: GameToolbarManager;
   private taskLogManager?: GameTaskLogManager;
   private dashboardManager?: GameDashboardManager;
+ 
 
   constructor() {
     super('GameManager');
@@ -263,9 +269,11 @@ class GameManager extends Phaser.Scene {
   /**
    * Bind escape menu and dashboard to keyboard triggers.
    */
+  
   private bindKeyboardTriggers() {
+
     this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.ESC,
+      keyboardShortcuts.escapeMenu,
       'up',
       async () => {
         if (this.getPhaseManager().isCurrentPhaseTerminal()) {
@@ -275,8 +283,9 @@ class GameManager extends Phaser.Scene {
         }
       }
     );
+
     this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.TAB,
+      keyboardShortcuts.dashboard,
       'up',
       async () => {
         if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Dashboard)) {
@@ -288,6 +297,75 @@ class GameManager extends Phaser.Scene {
         }
       }
     );
+    this.getInputManager().registerKeyboardListener(
+      Phaser.Input.Keyboard.KeyCodes.A,
+      'up',
+      async () => {
+        const modes = this.getCurrentLocationModes();
+        console.log(modes);
+      }
+    );
+    this.getInputManager().registerKeyboardListener(
+      keyboardShortcuts.explore,
+      'up',
+      async () => {
+        const modes = this.getCurrentLocationModes();
+        console.log("E pressed");
+        if (modes.includes(GameMode.Explore) && 
+            this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
+          await this.getPhaseManager().pushPhase(GamePhaseType.Explore);
+        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Explore)) {
+          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
+        }
+      }
+    );
+    this.getInputManager().registerKeyboardListener(
+      keyboardShortcuts.move,
+      'up',
+      async () => {
+        const modes = this.getCurrentLocationModes();
+        console.log("M pressed");
+        if (modes.includes(GameMode.Move) &&
+          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
+          await this.getPhaseManager().pushPhase(GamePhaseType.Move);
+        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Move)) {
+          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
+        }
+      }
+    );
+    this.getInputManager().registerKeyboardListener(
+      keyboardShortcuts.talk,
+      'up',
+      async () => {
+        const modes = this.getCurrentLocationModes();
+        console.log("T pressed");
+        if (modes.includes(GameMode.Talk) &&
+          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
+          await this.getPhaseManager().pushPhase(GamePhaseType.Talk);
+        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Talk)) {
+          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
+        }
+      }
+    );
+  }
+
+  /**
+   * the same method from GameModeMenu to get the available modes under current location
+   */
+  private getCurrentLocationModes() {
+    const currLocId = this.currentLocationId;
+    let latestModesInLoc = this.getStateManager().getLocationModes(currLocId);
+    const talkTopics = GameGlobalAPI.getInstance().getGameItemsInLocation(
+      GameItemType.talkTopics,
+      currLocId
+    );
+
+    // Remove talk mode if there is no talk topics
+    if (talkTopics.length === 0) {
+      latestModesInLoc = latestModesInLoc.filter(mode => mode !== GameMode.Talk);
+    }
+
+    return latestModesInLoc;
   }
 
   /**
@@ -339,7 +417,7 @@ class GameManager extends Phaser.Scene {
     await this.getActionManager().processGameActions(
       this.getStateManager().getGameMap().getCheckpointCompleteActions()
     );
-
+    
     // Reset input and cursor, in case it is changed after story complete actions
     this.getInputManager().setDefaultCursor(Constants.defaultCursor);
     this.getInputManager().enableMouseInput(true);

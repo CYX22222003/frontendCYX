@@ -72,7 +72,7 @@ class Bindings extends Phaser.Scene {
           binding.key,
           binding.text,
           bindingPositions[index][0],
-          bindingPositions[index][1] + BindingConstants.key.yStart
+          bindingPositions[index][1] + BindingConstants.key.yStart - 275
         )
       )
     );
@@ -91,12 +91,28 @@ class Bindings extends Phaser.Scene {
   private getBindings() {
     return [
       {
-        key: 'Esc',
+        key: 'ESC',
         text: 'Escape Menu'
       },
       {
         key: 'Tab',
         text: 'Dashboard'
+      },
+      {
+        key: 'Space',
+        text: 'Next dialogue'
+      },
+      {
+        key: 'M',
+        text: "Move mode"
+      },
+      {
+        key: "T",
+        text: "Talk mode"
+      },
+      {
+        key: "E",
+        text: "Move mode"
       }
     ];
   }
@@ -122,6 +138,13 @@ class Bindings extends Phaser.Scene {
     );
     switch (key) {
       case 'Tab':
+        keyIcon.setTexture(ImageAssets.medKeyboardIcon.key);
+        break;
+      default:
+        break;
+    }
+    switch (key) {
+      case 'Space':
         keyIcon.setTexture(ImageAssets.medKeyboardIcon.key);
         break;
       default:
