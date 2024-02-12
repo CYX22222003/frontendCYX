@@ -62,7 +62,7 @@ class Bindings extends Phaser.Scene {
     const bindings = this.getBindings();
     const bindingPositions = calcListFormatPos({
       numOfItems: bindings.length,
-      xSpacing: 10,
+      xSpacing: 0,
       ySpacing: BindingConstants.key.yInterval
     });
 
