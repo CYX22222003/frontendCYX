@@ -185,7 +185,6 @@ class GameModeMove implements IGameUI {
   private registerKeyboardListener() : void {
     //CYX: create new inputManager when the Game Move mode is activated
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    inputManager.enableKeyboardInput(true);
     const navList2 : string[] = this.getLatestNavigations();
     
     let count = 0;
@@ -232,13 +231,7 @@ class GameModeMove implements IGameUI {
 
   private removeKeyboardListner() : void {
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    const navList = this.getLatestNavigations();
-    navList.forEach( nav => {
-      inputManager.clearKeyboardListener(
-        this.KeycodesMap[navList.indexOf(nav)]  
-      );
-    }
-    );
+    inputManager.clearKeyboardListener(this.KeycodesMap);
   }
 
   /**

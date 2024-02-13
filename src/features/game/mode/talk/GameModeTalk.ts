@@ -1,5 +1,5 @@
 //CYX: add keyboard shortcuts to select talk topics
-import GameGlobalAPI from 'src/features/game/scenes/gameManager/GameGlobalAPI';
+import GameGlobalAPI from '../../scenes/gameManager/GameGlobalAPI';
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
 import CommonBackButton from '../../commons/CommonBackButton';
@@ -147,7 +147,6 @@ class GameModeTalk implements IGameUI {
   private registerKeyboardListner() : void {
     const talkTopics : ItemId[] = this.getLatestTalkTopics();
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    inputManager.enableKeyboardInput(true);
     let count = 0;
     console.log(talkTopics);
     talkTopics.forEach(
@@ -193,16 +192,9 @@ class GameModeTalk implements IGameUI {
    * Remove keyboard listners for topic selection after a topic is selected
    * 
    * */ 
-  private removeKeyboardListner() : void {
-    const talkTopics = this.getLatestTalkTopics();
+  private removeKeyboardListner(): void {
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    
-    talkTopics.forEach(dialogueId => {
-      console.log("clearing exixting listener: " + this.KeycodesMap[talkTopics.indexOf(dialogueId)]);
-      inputManager.clearKeyboardListener(
-        this.KeycodesMap[talkTopics.indexOf(dialogueId)]
-      );
-    });
+    inputManager.clearKeyboardListener(this.KeycodesMap);
   }
 
   /**
