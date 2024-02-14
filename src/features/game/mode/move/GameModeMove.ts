@@ -83,10 +83,6 @@ class GameModeMove implements IGameUI {
 
     // Add all navigation buttons
     const navigations = this.getLatestNavigations();
-    console.log(typeof navigations[0]);
-  
-    console.log(navigations);
-
     const buttons = this.getMoveButtons(navigations, previewFill);
     const buttonPositions = calcTableFormatPos({
       numOfItems: buttons.length,
@@ -98,7 +94,7 @@ class GameModeMove implements IGameUI {
       buttons.map((button, index) => {
         id++;
         return this.createMoveButton(
-          id + ": " + button.text,
+          "[" + id + "] " + button.text,
           buttonPositions[index][0] + MoveModeConstants.button.xOffSet,
           buttonPositions[index][1],
           button.callback,

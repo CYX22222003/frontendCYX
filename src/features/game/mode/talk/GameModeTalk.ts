@@ -1,4 +1,3 @@
-//CYX: add keyboard shortcuts to select talk topics
 import GameGlobalAPI from 'src/features/game/scenes/gameManager/GameGlobalAPI';
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
@@ -63,7 +62,7 @@ class GameModeTalk implements IGameUI {
     talkMenuContainer.add(
       buttons.map((button, index) =>
         this.createTalkTopicButton(
-          (topicId++) + 1 + ": " + button.text,
+          "[" + ((topicId++) + 1) + "] " + button.text,
           buttonPositions[index][0],
           buttonPositions[index][1],
           button.callback
