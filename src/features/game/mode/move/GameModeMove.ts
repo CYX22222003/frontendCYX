@@ -190,7 +190,6 @@ class GameModeMove implements IGameUI {
         this.KeycodesMap[count],
         'up',
         async () => {
-          console.log("check for value: " + nav);
           await GameGlobalAPI.getInstance().swapPhase(GamePhaseType.Sequence);
           await GameGlobalAPI.getInstance().changeLocationTo(nav);
         }

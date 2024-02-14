@@ -298,19 +298,10 @@ class GameManager extends Phaser.Scene {
       }
     );
     this.getInputManager().registerKeyboardListener(
-      Phaser.Input.Keyboard.KeyCodes.A,
-      'up',
-      async () => {
-        const modes = this.getCurrentLocationModes();
-        console.log(modes);
-      }
-    );
-    this.getInputManager().registerKeyboardListener(
       keyboardShortcuts.explore,
       'up',
       async () => {
         const modes = this.getCurrentLocationModes();
-        console.log("E pressed");
         if (modes.includes(GameMode.Explore) && 
             this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
           await this.getPhaseManager().pushPhase(GamePhaseType.Explore);
@@ -324,7 +315,6 @@ class GameManager extends Phaser.Scene {
       'up',
       async () => {
         const modes = this.getCurrentLocationModes();
-        console.log("M pressed");
         if (modes.includes(GameMode.Move) &&
           this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
           await this.getPhaseManager().pushPhase(GamePhaseType.Move);
@@ -338,7 +328,6 @@ class GameManager extends Phaser.Scene {
       'up',
       async () => {
         const modes = this.getCurrentLocationModes();
-        console.log("T pressed");
         if (modes.includes(GameMode.Talk) &&
           this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
           await this.getPhaseManager().pushPhase(GamePhaseType.Talk);

@@ -54,12 +54,11 @@ export default class DialogueManager{
     this.getKeyBoardManager().registerKeyboardListener(
       keyboardShortcuts.nextDialogue,
       'up',
-      async () => {console.log("Space pressed"); await this.showNextLine(resolve);});
+      async () => {await this.showNextLine(resolve);});
     this.getDialogueRenderer()
       .getDialogueBox()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, async () => {
         await this.showNextLine(resolve);
-        console.log("click");
       });
   }
 

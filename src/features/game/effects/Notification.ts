@@ -60,7 +60,6 @@ export async function displayNotification(scene: IBaseScene, message: string): P
       keyboardShortcuts.dissolveNotification,
       'up',
       async () => {
-        console.log("Space for notification pressed");
         KeyBoardManager.clearKeyboardListener(keyboardShortcuts.dissolveNotification);
         SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
         fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });

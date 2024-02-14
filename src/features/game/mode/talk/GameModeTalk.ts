@@ -148,10 +148,8 @@ class GameModeTalk implements IGameUI {
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
     inputManager.enableKeyboardInput(true);
     let count = 0;
-    console.log(talkTopics);
     talkTopics.forEach(
       (dialogueId : ItemId) => {
-        console.log("register " + dialogueId);
         inputManager.registerKeyboardListener(
           this.KeycodesMap[count],
           "up",
@@ -197,7 +195,6 @@ class GameModeTalk implements IGameUI {
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
     
     talkTopics.forEach(dialogueId => {
-      console.log("clearing exixting listener: " + this.KeycodesMap[talkTopics.indexOf(dialogueId)]);
       inputManager.clearKeyboardListener(
         this.KeycodesMap[talkTopics.indexOf(dialogueId)]
       );
