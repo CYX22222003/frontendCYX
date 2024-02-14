@@ -8,7 +8,7 @@ import { mandatory } from '../../utils/GameUtils';
 import { calcListFormatPos } from '../../utils/StyleUtils';
 import { createBitmapText } from '../../utils/TextUtils';
 import { BindingConstants, keyDescStyle, keyStyle } from './BindingsConstants';
-
+// test for git pushu
 /**
  * Displays various bindings of the game.
  * Static scene.
@@ -68,12 +68,10 @@ class Bindings extends Phaser.Scene {
 
     bindingsContainer.add(
       bindings.map((binding, index) => {
-        console.log(bindingPositions[index][0]);
-        console.log(bindingPositions[index][1]);
         return this.createBinding(
           binding.key,
           binding.text,
-          bindingPositions[index][1] <= 450 
+          bindingPositions[index][1] < 450 
             ? bindingPositions[index][0] - 400
             : bindingPositions[index][0] + 400,
           bindingPositions[index][1] <= 450
@@ -110,8 +108,9 @@ class Bindings extends Phaser.Scene {
         text: 'Next dialogue'
       },
       {
-        key: 'V',
-        text: "Enter the Move mode"
+        key: "<Number>",
+        text: "       Select topics/locations"
+   
       },
       {
         key: "T",
@@ -122,8 +121,8 @@ class Bindings extends Phaser.Scene {
         text: "Enter the Explore mode"
       },
       {
-        key: "<Number>",
-        text: "       Select topics/locations"
+        key: 'V',
+        text: "Enter the Move mode"
       }
     ];
   }
