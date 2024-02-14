@@ -75,12 +75,17 @@ export default class DialogueManager{
 
     // Disable interactions while processing actions
     GameGlobalAPI.getInstance().enableSprite(this.getDialogueRenderer().getDialogueBox(), false);
+    
+
     if (prompt) {
+      this.getKeyBoardManager().enableKeyboardInput(false);
       const response = await promptWithChoices(
         GameGlobalAPI.getInstance().getGameManager(),
         prompt.promptTitle,
         prompt.choices.map(choice => choice[0])
       );
+     
+      this.getKeyBoardManager().enableKeyboardInput(true);
       this.getDialogueGenerator().updateCurrPart(prompt.choices[response][1]);
     }
     await GameGlobalAPI.getInstance().processGameActionsInSamePhase(actionIds);
