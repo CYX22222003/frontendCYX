@@ -84,9 +84,9 @@ class GameInputManager {
     this.eventListeners.forEach(eventListener => eventListener.removeAllListeners());
   }
   //CYX: this new method is created to remove a specific keyboard listener
-  public clearKeyboardListener(keycode: number){
+  public clearKeyboardListener(keycodes: number[]){
     this.keyboardListeners.forEach(keyboardListener => {
-      if(keyboardListener.keyCode === keycode){
+      if(keycodes.includes(keyboardListener.keyCode)){
         keyboardListener.removeAllListeners();
       }
     })

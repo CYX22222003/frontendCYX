@@ -93,7 +93,7 @@ export default class DialogueManager{
 
     if (!line) {
       // clear keyboard listeners when dialogue ends
-      this.getKeyBoardManager().clearKeyboardListener(keyboardShortcuts.nextDialogue);
+      this.getKeyBoardManager().clearKeyboardListener([keyboardShortcuts.nextDialogue]);
       resolve();
     }
   }

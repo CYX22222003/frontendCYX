@@ -1,5 +1,4 @@
-import { Layer } from 'src/features/game/layer/GameLayerTypes';
-
+import { Layer } from '../layer/GameLayerTypes';
 import FontAssets from '../assets/FontAssets';
 import SoundAssets from '../assets/SoundAssets';
 import { Constants, screenCenter } from '../commons/CommonConstants';
@@ -52,15 +51,14 @@ export async function displayNotification(scene: IBaseScene, message: string): P
 
   // create new keyboard manager
   const KeyBoardManager = new GameInputManager(scene);
-  // enable keyboard input
-  KeyBoardManager.enableKeyboardInput(true);
+
   const showNotification = new Promise<void>(resolve => {
     // using the same binding as dialogue shortcut
     KeyBoardManager.registerKeyboardListener(
       keyboardShortcuts.dissolveNotification,
       'up',
       async () => {
-        KeyBoardManager.clearKeyboardListener(keyboardShortcuts.dissolveNotification);
+        KeyBoardManager.clearKeyboardListener([keyboardShortcuts.dissolveNotification]);
         SourceAcademyGame.getInstance().getSoundManager().playSound(SoundAssets.notifExit.key);
         fadeAndDestroy(scene, notifText, { fadeDuration: Constants.fadeDuration / 4 });
         dialogueRenderer.destroy();

@@ -1,4 +1,4 @@
-import GameGlobalAPI from 'src/features/game/scenes/gameManager/GameGlobalAPI';
+import GameGlobalAPI from '../../scenes/gameManager/GameGlobalAPI';
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
 import CommonBackButton from '../../commons/CommonBackButton';
@@ -146,7 +146,6 @@ class GameModeTalk implements IGameUI {
   private registerKeyboardListner() : void {
     const talkTopics : ItemId[] = this.getLatestTalkTopics();
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    inputManager.enableKeyboardInput(true);
     let count = 0;
     talkTopics.forEach(
       (dialogueId : ItemId) => {
@@ -190,15 +189,9 @@ class GameModeTalk implements IGameUI {
    * Remove keyboard listners for topic selection after a topic is selected
    * 
    * */ 
-  private removeKeyboardListner() : void {
-    const talkTopics = this.getLatestTalkTopics();
+  private removeKeyboardListner(): void {
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    
-    talkTopics.forEach(dialogueId => {
-      inputManager.clearKeyboardListener(
-        this.KeycodesMap[talkTopics.indexOf(dialogueId)]
-      );
-    });
+    inputManager.clearKeyboardListener(this.KeycodesMap);
   }
 
   /**

@@ -1,4 +1,4 @@
-import GameGlobalAPI from 'src/features/game/scenes/gameManager/GameGlobalAPI';
+import GameGlobalAPI from '../../scenes/gameManager/GameGlobalAPI';
 
 import ImageAssets from '../../assets/ImageAssets';
 import SoundAssets from '../../assets/SoundAssets';
