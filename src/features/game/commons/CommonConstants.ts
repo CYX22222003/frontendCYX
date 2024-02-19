@@ -36,4 +36,4 @@ export const keyboardShortcuts = {
   explore: Phaser.Input.Keyboard.KeyCodes.E,
   move: Phaser.Input.Keyboard.KeyCodes.V,
   talk: Phaser.Input.Keyboard.KeyCodes.T
-}
+};

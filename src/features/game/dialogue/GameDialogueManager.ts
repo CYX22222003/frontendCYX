@@ -1,6 +1,8 @@
 import SoundAssets from '../assets/SoundAssets';
+import { keyboardShortcuts } from '../commons/CommonConstants';
 import { ItemId } from '../commons/CommonTypes';
 import { promptWithChoices } from '../effects/Prompt';
+import GameInputManager from '../input/GameInputManager';
 import { Layer } from '../layer/GameLayerTypes';
 import GameGlobalAPI from '../scenes/gameManager/GameGlobalAPI';
 import SourceAcademyGame from '../SourceAcademyGame';
@@ -9,21 +11,19 @@ import DialogueGenerator from './GameDialogueGenerator';
 import DialogueRenderer from './GameDialogueRenderer';
 import DialogueSpeakerRenderer from './GameDialogueSpeakerRenderer';
 
-import GameInputManager from '../input/GameInputManager';
-import { keyboardShortcuts } from '../commons/CommonConstants';
-
 /**
  * Given a dialogue Id, this manager renders the correct dialogue.
  * It displays the lines, speakers, and performs actions
  * whenever players click on the dialogue box
  */
 
-
-export default class DialogueManager{
+export default class DialogueManager {
   private speakerRenderer?: DialogueSpeakerRenderer;
   private dialogueRenderer?: DialogueRenderer;
   private dialogueGenerator?: DialogueGenerator;
-  private KeyBoardManager?: GameInputManager = new GameInputManager(GameGlobalAPI.getInstance().getGameManager());
+  private KeyBoardManager?: GameInputManager = new GameInputManager(
+    GameGlobalAPI.getInstance().getGameManager()
+  );
 
   /**
    * @param dialogueId the dialogue Id of the dialogue you want to play
@@ -50,11 +50,14 @@ export default class DialogueManager{
 
   private async playWholeDialogue(resolve: () => void) {
     await this.showNextLine(resolve);
-    // add keyboard listener for dialogue box 
+    // add keyboard listener for dialogue box
     this.getKeyBoardManager().registerKeyboardListener(
       keyboardShortcuts.nextDialogue,
       'up',
-      async () => {await this.showNextLine(resolve);});
+      async () => {
+        await this.showNextLine(resolve);
+      }
+    );
     this.getDialogueRenderer()
       .getDialogueBox()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, async () => {
@@ -75,7 +78,6 @@ export default class DialogueManager{
 
     // Disable interactions while processing actions
     GameGlobalAPI.getInstance().enableSprite(this.getDialogueRenderer().getDialogueBox(), false);
-    
 
     if (prompt) {
       this.getKeyBoardManager().enableKeyboardInput(false);
@@ -84,7 +86,7 @@ export default class DialogueManager{
         prompt.promptTitle,
         prompt.choices.map(choice => choice[0])
       );
-     
+
       this.getKeyBoardManager().enableKeyboardInput(true);
       this.getDialogueGenerator().updateCurrPart(prompt.choices[response][1]);
     }

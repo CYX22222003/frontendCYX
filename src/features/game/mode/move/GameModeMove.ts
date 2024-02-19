@@ -4,6 +4,7 @@ import SoundAssets from '../../assets/SoundAssets';
 import CommonBackButton from '../../commons/CommonBackButton';
 import { screenCenter, screenSize } from '../../commons/CommonConstants';
 import { IGameUI } from '../../commons/CommonTypes';
+import { ItemId } from '../../commons/CommonTypes';
 import { fadeAndDestroy } from '../../effects/FadeEffect';
 import { entryTweenProps, exitTweenProps } from '../../effects/FlyEffect';
 import { Layer } from '../../layer/GameLayerTypes';
@@ -14,7 +15,6 @@ import { createButton } from '../../utils/ButtonUtils';
 import { sleep } from '../../utils/GameUtils';
 import { calcTableFormatPos } from '../../utils/StyleUtils';
 import MoveModeConstants, { moveButtonStyle } from './GameModeMoveConstants';
-import { ItemId } from '../../commons/CommonTypes';
 
 /**
  * The class in charge of showing the "Move" UI
@@ -23,10 +23,10 @@ import { ItemId } from '../../commons/CommonTypes';
  */
 class GameModeMove implements IGameUI {
   /**
-     * CYX: add input manager and keyboard register
-     * @KeycodesMap the list of keyboard constants.
-     * This is used later for keyboard shortcuts
-  **/ 
+   * CYX: add input manager and keyboard register
+   * @KeycodesMap the list of keyboard constants.
+   * This is used later for keyboard shortcuts
+   **/
   private KeycodesMap = [
     Phaser.Input.Keyboard.KeyCodes.ONE,
     Phaser.Input.Keyboard.KeyCodes.TWO,
@@ -50,7 +50,7 @@ class GameModeMove implements IGameUI {
   /**
    * Fetches the navigations of the current location id.
    */
-  private getLatestNavigations() : ItemId[] {
+  private getLatestNavigations(): ItemId[] {
     return GameGlobalAPI.getInstance().getGameItemsInLocation(
       GameItemType.navigation,
       GameGlobalAPI.getInstance().getCurrLocId()
@@ -94,14 +94,14 @@ class GameModeMove implements IGameUI {
       buttons.map((button, index) => {
         id++;
         return this.createMoveButton(
-          "[" + id + "] " + button.text,
+          '[' + id + '] ' + button.text,
           buttonPositions[index][0] + MoveModeConstants.button.xOffSet,
           buttonPositions[index][1],
           button.callback,
           button.onHover,
           button.onOut
-        ); }
-      )
+        );
+      })
     );
 
     const backButton = new CommonBackButton(
@@ -177,25 +177,20 @@ class GameModeMove implements IGameUI {
   /**
    * This function is to register keyboard listeners for location selection
    * This will only be called by activateUI function
-   * */ 
-  private registerKeyboardListener() : void {
+   * */
+  private registerKeyboardListener(): void {
     //CYX: create new inputManager when the Game Move mode is activated
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
-    const navList2 : string[] = this.getLatestNavigations();
-    
+    const navList2: string[] = this.getLatestNavigations();
+
     let count = 0;
     navList2.forEach(nav => {
-      inputManager.registerKeyboardListener(
-        this.KeycodesMap[count],
-        'up',
-        async () => {
-          await GameGlobalAPI.getInstance().swapPhase(GamePhaseType.Sequence);
-          await GameGlobalAPI.getInstance().changeLocationTo(nav);
-        }
-      );
+      inputManager.registerKeyboardListener(this.KeycodesMap[count], 'up', async () => {
+        await GameGlobalAPI.getInstance().swapPhase(GamePhaseType.Sequence);
+        await GameGlobalAPI.getInstance().changeLocationTo(nav);
+      });
       count += 1;
-    }
-    )
+    });
   }
 
   /**
@@ -219,12 +214,12 @@ class GameModeMove implements IGameUI {
     GameGlobalAPI.getInstance().playSound(SoundAssets.modeEnter.key);
   }
   /**
-   * Remove keyboard listners for location selection 
+   * Remove keyboard listners for location selection
    * when Move mode is transitioned out
-   * 
-   * */ 
+   *
+   * */
 
-  private removeKeyboardListner() : void {
+  private removeKeyboardListner(): void {
     const inputManager = GameGlobalAPI.getInstance().getGameManager().getInputManager();
     inputManager.clearKeyboardListener(this.KeycodesMap);
   }

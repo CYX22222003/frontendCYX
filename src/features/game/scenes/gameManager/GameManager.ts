@@ -7,6 +7,7 @@ import GameBBoxManager from '../../boundingBoxes/GameBoundingBoxManager';
 import { GameCheckpoint } from '../../chapter/GameChapterTypes';
 import GameCharacterManager from '../../character/GameCharacterManager';
 import { Constants } from '../../commons/CommonConstants';
+import { keyboardShortcuts } from '../../commons/CommonConstants';
 import { AssetKey } from '../../commons/CommonTypes';
 import GameDashboardManager from '../../dashboard/GameDashboardManager';
 import { DashboardPage } from '../../dashboard/GameDashboardTypes';
@@ -17,10 +18,11 @@ import { addLoadingScreen } from '../../effects/LoadingScreen';
 import GameEscapeManager from '../../escape/GameEscapeManager';
 import GameInputManager from '../../input/GameInputManager';
 import GameLayerManager from '../../layer/GameLayerManager';
-
 import { Layer } from '../../layer/GameLayerTypes';
 import { LocationId } from '../../location/GameMapTypes';
+import { GameItemType } from '../../location/GameMapTypes';
 import GameLogManager from '../../log/GameLogManager';
+import { GameMode } from '../../mode/GameModeTypes';
 import GameObjectManager from '../../objects/GameObjectManager';
 import GamePhaseManager from '../../phase/GamePhaseManager';
 import { GamePhaseType } from '../../phase/GamePhaseTypes';
@@ -32,10 +34,6 @@ import GameToolbarManager from '../../toolbar/GameToolbarManager';
 import { mandatory, sleep, toS3Path } from '../../utils/GameUtils';
 import GameGlobalAPI from './GameGlobalAPI';
 import { createGamePhases } from './GameManagerHelper';
-
-import { GameItemType } from '../../location/GameMapTypes';
-import { GameMode } from '../../mode/GameModeTypes';
-import { keyboardShortcuts } from '../../commons/CommonConstants';
 
 type GameManagerProps = {
   continueGame: boolean;
@@ -77,7 +75,6 @@ class GameManager extends Phaser.Scene {
   private toolbarManager?: GameToolbarManager;
   private taskLogManager?: GameTaskLogManager;
   private dashboardManager?: GameDashboardManager;
- 
 
   constructor() {
     super('GameManager');
@@ -269,9 +266,8 @@ class GameManager extends Phaser.Scene {
   /**
    * Bind escape menu and dashboard to keyboard triggers.
    */
-  
-  private bindKeyboardTriggers() {
 
+  private bindKeyboardTriggers() {
     this.getInputManager().registerKeyboardListener(
       keyboardShortcuts.escapeMenu,
       'up',
@@ -284,58 +280,48 @@ class GameManager extends Phaser.Scene {
       }
     );
 
-    this.getInputManager().registerKeyboardListener(
-      keyboardShortcuts.dashboard,
-      'up',
-      async () => {
-        if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Dashboard)) {
-          await this.getPhaseManager().popPhase();
-        } else if (this.getPhaseManager().isCurrentPhaseTerminal()) {
-          await this.getPhaseManager().swapPhase(GamePhaseType.Dashboard);
-        } else {
-          await this.getPhaseManager().pushPhase(GamePhaseType.Dashboard);
-        }
+    this.getInputManager().registerKeyboardListener(keyboardShortcuts.dashboard, 'up', async () => {
+      if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Dashboard)) {
+        await this.getPhaseManager().popPhase();
+      } else if (this.getPhaseManager().isCurrentPhaseTerminal()) {
+        await this.getPhaseManager().swapPhase(GamePhaseType.Dashboard);
+      } else {
+        await this.getPhaseManager().pushPhase(GamePhaseType.Dashboard);
       }
-    );
-    this.getInputManager().registerKeyboardListener(
-      keyboardShortcuts.explore,
-      'up',
-      async () => {
-        const modes = this.getCurrentLocationModes();
-        if (modes.includes(GameMode.Explore) && 
-            this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
-          await this.getPhaseManager().pushPhase(GamePhaseType.Explore);
-        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Explore)) {
-          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
-        }
+    });
+    this.getInputManager().registerKeyboardListener(keyboardShortcuts.explore, 'up', async () => {
+      const modes = this.getCurrentLocationModes();
+      if (
+        modes.includes(GameMode.Explore) &&
+        this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)
+      ) {
+        await this.getPhaseManager().pushPhase(GamePhaseType.Explore);
+      } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Explore)) {
+        await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
       }
-    );
-    this.getInputManager().registerKeyboardListener(
-      keyboardShortcuts.move,
-      'up',
-      async () => {
-        const modes = this.getCurrentLocationModes();
-        if (modes.includes(GameMode.Move) &&
-          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
-          await this.getPhaseManager().pushPhase(GamePhaseType.Move);
-        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Move)) {
-          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
-        }
+    });
+    this.getInputManager().registerKeyboardListener(keyboardShortcuts.move, 'up', async () => {
+      const modes = this.getCurrentLocationModes();
+      if (
+        modes.includes(GameMode.Move) &&
+        this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)
+      ) {
+        await this.getPhaseManager().pushPhase(GamePhaseType.Move);
+      } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Move)) {
+        await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
       }
-    );
-    this.getInputManager().registerKeyboardListener(
-      keyboardShortcuts.talk,
-      'up',
-      async () => {
-        const modes = this.getCurrentLocationModes();
-        if (modes.includes(GameMode.Talk) &&
-          this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)){
-          await this.getPhaseManager().pushPhase(GamePhaseType.Talk);
-        } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Talk)) {
-          await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
-        }
+    });
+    this.getInputManager().registerKeyboardListener(keyboardShortcuts.talk, 'up', async () => {
+      const modes = this.getCurrentLocationModes();
+      if (
+        modes.includes(GameMode.Talk) &&
+        this.getPhaseManager().isCurrentPhase(GamePhaseType.Menu)
+      ) {
+        await this.getPhaseManager().pushPhase(GamePhaseType.Talk);
+      } else if (this.getPhaseManager().isCurrentPhase(GamePhaseType.Talk)) {
+        await this.getPhaseManager().swapPhase(GamePhaseType.Menu);
       }
-    );
+    });
   }
 
   /**
@@ -406,7 +392,7 @@ class GameManager extends Phaser.Scene {
     await this.getActionManager().processGameActions(
       this.getStateManager().getGameMap().getCheckpointCompleteActions()
     );
-    
+
     // Reset input and cursor, in case it is changed after story complete actions
     this.getInputManager().setDefaultCursor(Constants.defaultCursor);
     this.getInputManager().enableMouseInput(true);
